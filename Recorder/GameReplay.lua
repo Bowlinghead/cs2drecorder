@@ -22,25 +22,53 @@ GameReplay.timeStamp = 1;		-- ticks every 100ms
 GameReplay.defaultPath = "sys/lua/GameReplay/Records/"
 GameReplay.actualState = GameState:new();		-- providing an temporary actualState you should use
 
+GameReplay.stateList = {};
+
 
 function GameReplay:Tick()
 	if (GameReplay.isRecording) then
-		
-		io.write(tostring(self.timeStamp).. " = "..self.actualState:ToString());
-		
-		--table.insert(gameStateEntry, self); -- Just write; no need for 16gig RAM
-		
-		self.timeStamp = self.timeStamp + 1
-		
-		self.actualState = GameState:new();		-- Create a new actualState
-		
+		self.stateList[GameReplay.timeStamp] = self.actualState;
+		self.actualState = GameState:new();	
+		GameReplay.timeStamp = GameReplay.timeStamp + 1;
 	end
 end
 
+
+function GameReplay:Save()
+	if (GameReplay.isRecording) then
+		
+		for timeStamp,state in pairs(self.stateList) do
+			if (state ~= nil) then
+				io.write(tostring(timeStamp).." = "..state:ToString());
+			end
+		end
+		self.stateList = {};
+	end
+
+end
+
+function GameReplay:SaveSome(amount)
+	local counter = 0;
+	
+	for timeStamp, state in pairs(self.stateList) do
+		if (counter >= amount) then
+			return;
+		end
+		
+		if (state ~= nil) then
+			io.Write(tostring(timeStamp).." = "..self.stateList[timeStamp]:ToString());
+			
+			self.stateList[timeStamp] = nil;
+			
+			counter = counter + 1;
+		end
+	end
+
+end
+
+
 function GameReplay:New(object)
 	object = object or {};   				-- create object if user does not provide one
-	
-	
 	setmetatable(object, self);
 	self.__index = self;
 	return object;
@@ -52,13 +80,14 @@ function GameReplay:StartRecord(savefile)
 		msg("\169255255255Already recording...")
 		return;
 	else
+		GameReplay.timeStamp = 1;
 		GameReplay.isRecording = true;
 	end
 	
 	
 
 	-- IO stuff
-	self.file = io.open(self.defaultPath..savefile..self.format,"w");
+	self.file = io.open(self.defaultPath..savefile..self.format,"a");
 	io.output(self.file);
 	local strWrite = tostring(self.version).." = [ \n";
 
@@ -91,11 +120,15 @@ end
 
 
 function GameReplay:EndRecord()
+	if (GameReplay.isRecording) then
 
+		self:Save();
 
-	msg("\169255255255Stopped the recording!");
-	io.close()
-	GameReplay.isRecording = false;
+		io.close()
+		
+		msg("\169255255255Stopped the recording!");
+		GameReplay.isRecording = false;
+	end
 end
 
 

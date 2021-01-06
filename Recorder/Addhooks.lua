@@ -30,14 +30,21 @@ function SayHook(id,txt)
 	end
 end
 
-
 -- END RECORD
 addhook("shutdown","ShutdownHook") 
 function ShutdownHook()
 	gameReplay:EndRecord();
 end
 
+addhook(Config.saveHook,"SaveHook")
+function SaveHook()
+	--gameReplay:SaveSome(10);
+end
 
+addhook("startround","StartroundHook")
+function StartroundHook()
+	gameReplay:Save();
+end
 
 
 --[[
@@ -46,8 +53,10 @@ end
 	
 	INCLUDING FOR NOW:
 	
-	rotation 		-- every 100ms
-	move			-- every 100ms
+	rotation 		-- every updateHook
+	move			-- every updateHook
+	
+	move
 	attack
 	attack2
 	hit
@@ -69,26 +78,30 @@ end
 addhook(Config.updateHook,"UpdateHook")
 function UpdateHook()
 	
+	
 	for _,id in ipairs(player(0,"tableliving")) do
+		msg("pId:  "..id.."  /// Tick:  "..gameReplay.timeStamp)
+
 		-- Save rotation
 		assembler = Assembler:New();
 		assembler:SetEntry(player(id,"rot"));
 		
 		gameReplay.actualState:SetEntry("rotation", id, assembler:Assemble());
-		
-		
-		-- Save position
-		assembler = Assembler:New();
-		assembler:SetEntry(player(id,"x"));
-		assembler:SetEntry(player(id,"y"));
-		
-		gameReplay.actualState:SetEntry("move", id, assembler:Assemble());	
 	end
 
 	-- Increment the timestamp
 	gameReplay:Tick();
 end
 
+
+addhook("move","MoveHook")
+function MoveHook(id,x,y)
+	assembler = Assembler:New();
+	assembler:SetEntry(x);
+	assembler:SetEntry(y);
+	
+	gameReplay.actualState:SetEntry("move", id, assembler:Assemble());
+end
 
 addhook("attack","AttackHook")
 function AttackHook(id)
@@ -111,11 +124,11 @@ end
 addhook("hit","HitHook")
 function HitHook(vic, src, wpn, hp, ap, obj)
 	assembler = Assembler:New();
-	assembler.SetEntry(src);
-	assembler.SetEntry(wpn);
-	assembler.SetEntry(hp);
-	assembler.SetEntry(ap);
-	assembler.SetEntry(obj);
+	assembler:SetEntry(src);
+	assembler:SetEntry(wpn);
+	assembler:SetEntry(hp);
+	assembler:SetEntry(ap);
+	assembler:SetEntry(obj);
 	
 	gameReplay.actualState:SetEntry("hit", vic, assembler:Assemble());
 end
@@ -134,8 +147,8 @@ end
 addhook("bombplant", "BombplantHook")
 function BombplantHook(id,x,y)
 	assembler = Assembler:New();
-	assembler.SetEntry(x);
-	assembler.SetEntry(y);
+	assembler:SetEntry(x);
+	assembler:SetEntry(y);
 	
 	
 	gameReplay.actualState:SetEntry("bombplant", id, assembler:Assemble());
@@ -144,11 +157,11 @@ end
 addhook("die","DieHook")
 function DieHook(vic, kil, wpn, x, y, kobj)
 	assembler = Assembler:New();
-	assembler.SetEntry(kil);
-	assembler.SetEntry(wpn);
-	assembler.SetEntry(x);
-	assembler.SetEntry(y);
-	assembler.SetEntry(kobj);
+	assembler:SetEntry(kil);
+	assembler:SetEntry(wpn);
+	assembler:SetEntry(x);
+	assembler:SetEntry(y);
+	assembler:SetEntry(kobj);
 	
 	
 	gameReplay.actualState:SetEntry("die", vic, assembler:Assemble());
@@ -157,13 +170,13 @@ end
 addhook("drop","DropHook")
 function DropHook(id, iid, wtype, ammoIn, ammoSpare, mode, xTile, yTile)
 	assembler = Assembler:New();
-	assembler.SetEntry(iid);
-	assembler.SetEntry(wtype);
-	assembler.SetEntry(ammoIn);
-	assembler.SetEntry(ammoSpare);
-	assembler.SetEntry(mode);
-	assembler.SetEntry(xTile);
-	assembler.SetEntry(yTile);
+	assembler:SetEntry(iid);
+	assembler:SetEntry(wtype);
+	assembler:SetEntry(ammoIn);
+	assembler:SetEntry(ammoSpare);
+	assembler:SetEntry(mode);
+	assembler:SetEntry(xTile);
+	assembler:SetEntry(yTile);
 	
 	gameReplay.actualState:SetEntry("drop", id, assembler:Assemble());
 end
@@ -171,14 +184,14 @@ end
 addhook("buy","BuyHook")
 function BuyHook(id,wpn)
 	assembler = Assembler:New();
-	assembler.SetEntry(wpn);
+	assembler:SetEntry(wpn);
 	gameReplay.actualState:SetEntry("buy", id, assembler:Assemble());
 end
 
 addhook("reload","ReloadHook")
 function ReloadHook(id, mode)
 	assembler = Assembler:New();
-	assembler.SetEntry(mode);
+	assembler:SetEntry(mode);
 	
 	gameReplay.actualState:SetEntry("reload", id, assembler:Assemble());
 end
@@ -188,8 +201,8 @@ addhook("select","SelectHook")
 function SelectHook(id, wtype, mode)
 
 	assembler = Assembler:New();
-	assembler.SetEntry(wtype);
-	assembler.SetEntry(mode);
+	assembler:SetEntry(wtype);
+	assembler:SetEntry(mode);
 	
 	
 	gameReplay.actualState:SetEntry("select", id, assembler:Assemble());
@@ -201,18 +214,18 @@ end
 addhook("spawn", "SpawnHook")
 function SpawnHook(id)
 	assembler = Assembler:New();
-	assembler.SetEntry(player(id,"x"));
-	assembler.SetEntry(player(id,"y"));
+	assembler:SetEntry(player(id,"x"));
+	assembler:SetEntry(player(id,"y"));
 	gameReplay.actualState:SetEntry("respawn", id, assembler:Assemble());
 end
 
 addhook("use", "UseHook")
 function UseHook(id, event, data, x, y)
 	assembler = Assembler:New();
-	assembler.SetEntry(event);
-	assembler.SetEntry(data);
-	assembler.SetEntry(x);
-	assembler.SetEntry(y);
+	assembler:SetEntry(event);
+	assembler:SetEntry(data);
+	assembler:SetEntry(x);
+	assembler:SetEntry(y);
 	
 	gameReplay.actualState:SetEntry("use", id, assembler:Assemble());
 

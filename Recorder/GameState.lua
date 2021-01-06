@@ -3,31 +3,10 @@
 
 --[[ GameState 
 	Creates a big table including every action happened at this tick
-	GameState = {   
-		{ "hookname" , pid, "parameter_see_Addhooks_dot_lua"}
-		
-		
-		--example: (string view: Records/example.txt 
-		{ "rotation", 3, "128" },  	-- every 100ms
-		{ "move", 5, "64; 64" },	-- every 100ms
-		{ "attack", 5, "128" },
-		{ "attack2", 5, "128" },
-		{ "hit", 3, "5; 50; 30; 10; 0" },
-		{ "spray", 5, "" },
-		{ "bombdefuse", 5, "" },
-		{ "bombplant", 5, "32; 64" },
-		{ "die", 5, "3; 50; 32; 64; 0" },
-		...
-		
-		drop
-		buy
-		reload
-		select
-		spawn
-		use
-		
-		
-	}
+	
+	GameReplay got an actualState, this is a GameState object.
+	
+	Addhooks.lua uses its GameReplay.actualState to set the entries.
 ]]--
 
 GameState = { };
