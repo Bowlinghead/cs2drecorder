@@ -13,8 +13,8 @@ Config = {};
 	second	-- ever watched a video with one fps?
 	minute 	-- are you kiddin..
 ]]
-Config.updateHook = "second";
-
+Config.updateHook = "ms100";
+Config.saveHook = "second";
 
 --[[
 	Note that you can change them, please follow the shematics from the player lua cmd
@@ -67,7 +67,7 @@ Config.gameStats = {
 		"mp_buytime",
 		"mp_c4timer",
 		"mp_damagefactor",
-		"mp_deathdrop", -- 0 everything, 1 Prim+Sec+Defuse+NV, 2 Prim+Sec+Defuse, 3 Prim+Sec, 4 Nothing
+		"mp_deathdrop", 
 		"mp_dropgrenades",
 		"mp_flashlight",
 		"mp_freezetime",
